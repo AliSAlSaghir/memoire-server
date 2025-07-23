@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UserLoginRequest extends FormRequest {
   public function authorize(): bool {
-    return true; // allow all users to make this request
+    return true;
   }
 
   public function rules(): array {
