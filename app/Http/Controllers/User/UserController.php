@@ -4,55 +4,36 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CapsuleResource;
-use App\Models\Capsule;
-use App\Models\User;
+use App\Services\UserService;
+use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller {
-  public function update(Request $request) {
-    $user = User::find(auth('api')->id());
+  use ResponseTrait;
 
-    $validated = $request->validate([
+  public function update(Request $request) {
+    $user = Auth::guard('api')->user();
+
+    $request->validate([
       'name' => 'sometimes|string|max:255',
       'profile_picture' => 'sometimes|string',
     ]);
 
     if ($request->has('email') || $request->has('password')) {
-      return response()->json(['message' => 'Email and password cannot be updated.'], 403);
+      return $this->responseJSON('Email and password cannot be updated', 'error', 403);
     }
 
-    if ($request->has('profile_picture')) {
-      $image = $request->profile_picture;
+    $updatedUser = UserService::updateUser($user, $request->all());
 
-      preg_match("/^data:image\/(\w+);base64,/", $image, $type);
-      $image = preg_replace("/^data:image\/\w+;base64,/", '', $image);
-      $image = str_replace(' ', '+', $image);
-
-      $fileName = uniqid() . '.' . ($type[1] ?? 'png');
-      $filePath = storage_path("app/public/profile_pictures/$fileName");
-
-      file_put_contents($filePath, base64_decode($image));
-
-      $user->profile_picture_url = asset("storage/profile_pictures/$fileName");
-    }
-
-    if (isset($validated['name'])) {
-      $user->name = $validated['name'];
-    }
-
-    $user->save();
-
-    return response()->json([
-      'message' => 'User updated successfully.',
-      'user' => $user,
+    return $this->responseJSON([
+      'message' => 'User updated successfully',
+      'user' => $updatedUser
     ]);
   }
 
   public function getUserCapsules($userId) {
-    $capsules = Capsule::where('user_id', $userId);
-
-    return CapsuleResource::collection(
-      $capsules->latest()->get()
-    );
+    $capsules = UserService::getUserCapsules($userId);
+    return CapsuleResource::collection($capsules);
   }
 }
