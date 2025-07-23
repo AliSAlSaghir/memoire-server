@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateTagRequest;
+use App\Http\Requests\UpdateTagRequest;
 use App\Models\Tag;
 use App\Services\TagService;
-use Illuminate\Http\Request;
 
 class TagController extends Controller {
 
@@ -14,26 +15,19 @@ class TagController extends Controller {
     return $this->responseJSON($tags);
   }
 
-  public function store(Request $request) {
-    $request->validate([
-      'name' => 'required|string|unique:tags,name|max:255',
-    ]);
-
-    $tag = TagService::createTag($request->all());
+  public function store(CreateTagRequest $request) {
+    $tag = TagService::createTag($request->validated());
     return $this->responseJSON($tag);
   }
+
 
   public function show(Tag $tag) {
     $tag = TagService::getTag($tag);
     return $this->responseJSON($tag);
   }
 
-  public function update(Request $request, Tag $tag) {
-    $request->validate([
-      'name' => 'required|string|unique:tags,name,' . $tag->id . '|max:255',
-    ]);
-
-    $updatedTag = TagService::updateTag($tag, $request->all());
+  public function update(UpdateTagRequest $request, Tag $tag) {
+    $updatedTag = TagService::updateTag($tag, $request->validated());
     return $this->responseJSON($updatedTag);
   }
 
