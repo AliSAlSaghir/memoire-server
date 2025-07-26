@@ -195,8 +195,6 @@ class CapsuleService {
   public static function getPublicMoods() {
     return Capsule::where('reveal_at', '<=', now())
       ->where('privacy', 'public')
-      ->whereNotNull('mood')
-      ->where('mood', '<>', '')
       ->distinct()
       ->pluck('mood');
   }
