@@ -96,7 +96,6 @@ class AuthController extends Controller {
     );
 
     return response()->view('oauth.success', [
-      'token' => $token,
       'user' => $user,
     ])->withCookie($cookie);
   }

@@ -8,7 +8,6 @@
 <body>
     <script>
         window.opener.postMessage({
-                token: "{{ $token }}",
                 user: @json($user)
             },
             "http://localhost:5173"
